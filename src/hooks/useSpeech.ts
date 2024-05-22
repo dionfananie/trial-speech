@@ -12,11 +12,10 @@ const useSpeech = (text: string) => {
 
   const selectedWord = () => {
     if (selectedSentence) {
-      const pos = Number(charIdx) >>> 0;
+      const pos = charIdx;
 
       const left = selectedSentence.slice(0, pos + 1).search(/\S+$/);
       const right = selectedSentence.slice(pos).search(/\s/);
-      console.log("left: ", left);
 
       if (right < 0) {
         return selectedSentence.slice(left);
@@ -48,9 +47,6 @@ const useSpeech = (text: string) => {
   };
 
   utterance.onend = () => {
-    if (selectedItem !== sanitized.length - 1) {
-      // setSelectedItem((v) => v + 1);
-    }
     setSelectedItem(0);
   };
 
@@ -63,8 +59,6 @@ const useSpeech = (text: string) => {
   };
 
   utterance.onboundary = (event) => {
-    // console.log(event);
-
     if (event.name === "sentence") {
       setSelectedItem((v) => v + 1);
     } else {
