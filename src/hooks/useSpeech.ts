@@ -5,23 +5,34 @@ import sanitizeHtml from "../utils/sanitizeHtml";
 const useSpeech = (text: string) => {
   const sanitized = sanitizeHtml(text);
 
-  const [selectedItem, setSelectedItem] = useState(0);
+  const [selectedItem, setSelectedItem] = useState(-1);
   const [charIdx, setCharIdx] = useState(0);
-  const selectedSentence = sanitized[selectedItem - 1];
-  const utterance = initUtterance(sanitized.join("\n"));
+  const sentence = sanitized.join(". ");
+  const utterance = initUtterance(sentence);
 
   const selectedWord = () => {
-    if (selectedSentence) {
+    if (selectedItem >= 0) {
       const pos = charIdx;
 
-      const left = selectedSentence.slice(0, pos + 1).search(/\S+$/);
-      const right = selectedSentence.slice(pos).search(/\s/);
+      const left = sentence.slice(0, pos + 1).search(/\S+$/);
+      const right = sentence.slice(pos).search(/\s/);
 
       if (right < 0) {
-        return selectedSentence.slice(left);
+        const activeWord = sentence.slice(pos - 1);
+        return sentence.replace(
+          activeWord,
+          `<span class="blue">${activeWord}</span>`
+        );
+      } else {
+        const activeWord = sentence.slice(left, right + pos);
+
+        return sentence.replace(
+          activeWord,
+          `<span class="blue">${activeWord}</span>`
+        );
       }
-      return selectedSentence.slice(left, right + pos);
     }
+
     return "";
   };
 
@@ -35,7 +46,7 @@ const useSpeech = (text: string) => {
 
   const cancel = () => {
     speechSynthesis.cancel();
-    setSelectedItem(0);
+    setSelectedItem(-1);
   };
 
   const resume = () => {
@@ -47,7 +58,8 @@ const useSpeech = (text: string) => {
   };
 
   utterance.onend = () => {
-    setSelectedItem(0);
+    setSelectedItem(-1);
+    setCharIdx(-1);
   };
 
   utterance.onstart = (event) => {
@@ -59,11 +71,9 @@ const useSpeech = (text: string) => {
   };
 
   utterance.onboundary = (event) => {
-    if (event.name === "sentence") {
-      setSelectedItem((v) => v + 1);
-    } else {
+    if (event.name !== "sentence") {
       setCharIdx(event.charIndex);
-    }
+    } else setSelectedItem((v) => v + 1);
   };
 
   return {
@@ -71,7 +81,7 @@ const useSpeech = (text: string) => {
     pause,
     cancel,
     resume,
-    spoken: selectedSentence,
+    spoken: sanitized[selectedItem],
     word: selectedWord(),
   };
 };
