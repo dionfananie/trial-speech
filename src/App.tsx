@@ -1,11 +1,15 @@
 import "./App.css";
 import TextToSpeech from "./components/TextToSpeech";
 import { TEXT_MESSAGE } from "./constants";
+import useWordBreak from "./hooks/useWordBreak";
+// import useLongestCommonPrefix from "./hooks/useLongestCommonPrefix";
 import useSpeech from "./hooks/useSpeech";
 
 function App() {
   const { speak, pause, cancel, resume, spoken, word } =
     useSpeech(TEXT_MESSAGE);
+  // useLongestCommonPrefix();
+  useWordBreak();
   // https://jsfiddle.net/ourcodeworld/9k0z6m14/4/
   return (
     <div>
